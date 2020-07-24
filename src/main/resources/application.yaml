@@ -1,0 +1,32 @@
+server:
+  port: 8080
+  servlet:
+    context-path: /
+
+
+fabric:
+#  connectionPath: src/main/resources/Server1_fabric/connection-org1.yaml
+#  adminCertificatePem: src/main/resources/Server1_fabric/Admin@org1.example.com-cert.pem
+#  adminPricateKey: src/main/resources/Server1_fabric/priv_sk
+#  MSPID: Org1MSP
+  connectionPath: src/main/resources/suc_fabric/connection-org1.yaml
+  adminCertificatePem: src/main/resources/suc_fabric/cert.pem
+  adminPricateKey: src/main/resources/suc_fabric/priv_sk
+  MSPID: MSP-org1
+
+
+spring:
+  datasource:
+    driver-class-name: com.mysql.jdbc.Driver
+    url: jdbc:mysql://139.159.221.69:3305/fabric?useUnicode=true&characterEncoding=utf8&useSSL=false
+    username: root
+    password: root
+
+
+dc:
+  #  endpoint: http://localhost:6060/dc-server
+  endpoint: http://172.18.21.32:6060/dc-server
+  dataset-name: sample
+  # query-def: /queries/**
+  show-sql: true
+  # use-query-def-cache: false

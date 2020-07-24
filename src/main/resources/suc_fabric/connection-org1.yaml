@@ -1,0 +1,111 @@
+---
+name: "test"
+x-type: "hlfv1"
+description: "Sample connection profile for test"
+version: "1.0"
+client:
+  organization: morg1
+  connection:
+    timeout:
+      peer:
+        endorser: '300' # 背书超时时间ms
+
+channels:
+  foochannel:
+    orderers: # 排序节点信息
+      - orderer0.morg1.com
+    peers: # 通道节点集合
+      peer0.morg1.com:
+        endorsingPeer: true  # 是否背书节点（默认是true）
+        chaincodeQuery: true # 是否用于查询（默认是true）
+        ledgerQuery: true # 是否用于分类查询（默认是true）
+        eventSource: true # event hub 节点
+        discover: true
+
+organizations:
+  morg1:
+    mspid: MSP-org1
+    peers: # 组织节点
+      - peer0.morg1.com
+    certificateAuthorities: # 组织认证信息
+      - morg1-ca
+    adminPrivateKeyPEM: # admin 私钥路径，路径填path，文件内容填pem
+      path: # ...crypto-config/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp/keystore/priv_sk
+    signedCertPEM: # admin 签名证书路径
+      path: # ...crypto-config/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp/signcerts/Admin@org1.example.com-cert.pem
+
+orderers:
+  orderer0.morg1.com:
+    url: grpcs://172.18.21.78:8000
+    grpcOptions:
+      ssl-target-name-override: orderer0.morg1.com # ssl 目标节点，填写 orderer 域名
+      hostnameOverride: orderer0.morg1.com # orderer 域名
+    tlsCACerts: # tlsCA证书
+      pem: |
+        -----BEGIN CERTIFICATE-----
+        MIIB/zCCAaWgAwIBAgIUCJCtdOmdrADvkJEJjQAwzRgeFKcwCgYIKoZIzj0EAwIw
+        XDELMAkGA1UEBhMCWkgxETAPBgNVBAgTCFpoZWppYW5nMRAwDgYDVQQKEwdTdWNz
+        b2Z0MQswCQYDVQQLEwJJVDEbMBkGA1UEAxMScm9vdC10bHMtY2Etc2VydmVyMB4X
+        DTIwMDUyNjA4NTAwMFoXDTM1MDUyMzA4NTAwMFowXDELMAkGA1UEBhMCWkgxETAP
+        BgNVBAgTCFpoZWppYW5nMRAwDgYDVQQKEwdTdWNzb2Z0MQswCQYDVQQLEwJJVDEb
+        MBkGA1UEAxMScm9vdC10bHMtY2Etc2VydmVyMFkwEwYHKoZIzj0CAQYIKoZIzj0D
+        AQcDQgAEXHvAidXksn9jnB1fVNHmx2DPr4zn1MJZs/bctwBSgM9xyd9ozkFUHc7g
+        UDvg2ItNtzUXouszzTyotgnR6D3LM6NFMEMwDgYDVR0PAQH/BAQDAgEGMBIGA1Ud
+        EwEB/wQIMAYBAf8CAQIwHQYDVR0OBBYEFJ9DyrFuRgOKXdM1JQpvFFM5pDAHMAoG
+        CCqGSM49BAMCA0gAMEUCIQDOHSaxlnSbVjMzeOeNWuzoMNoACQuhuvEDQj9VsSed
+        TQIgVdgQ6qz9ASsph8RGl5di3ep1FvD519WyQnEcyarovRs=
+        -----END CERTIFICATE-----
+      # ...crypto-config/ordererOrganizations/example.com/orderers/orderer.example.com/tls/ca.crt
+    adminPrivateKeyPEM: # （和organization不一样）admin 私钥路径，路径填path，文件内容填pem
+      path: # ...crypto-config/ordererOrganizations/example.com/users/orderer.example.com/msp/keystore/priv_sk
+    signedCertPEM: # （和organization不一样）admin 签名证书路径
+      path: # ...crypto-config/ordererOrganizations/example.com/users/Admin@org1.example.com/msp/signcerts/Admin@org1.example.com（没显示完）
+
+
+peers: # 类似 orderers
+  peer0.morg1.com:
+    url: grpcs://172.18.21.78:9001
+    grpcOptions:
+      ssl-target-name-override: peer0.morg1.com
+      hostnameOverride: peer0.morg1.com
+      request-timeout: 120001
+    tlsCACerts:
+      pem: |
+        -----BEGIN CERTIFICATE-----
+        MIIB/zCCAaWgAwIBAgIUCJCtdOmdrADvkJEJjQAwzRgeFKcwCgYIKoZIzj0EAwIw
+        XDELMAkGA1UEBhMCWkgxETAPBgNVBAgTCFpoZWppYW5nMRAwDgYDVQQKEwdTdWNz
+        b2Z0MQswCQYDVQQLEwJJVDEbMBkGA1UEAxMScm9vdC10bHMtY2Etc2VydmVyMB4X
+        DTIwMDUyNjA4NTAwMFoXDTM1MDUyMzA4NTAwMFowXDELMAkGA1UEBhMCWkgxETAP
+        BgNVBAgTCFpoZWppYW5nMRAwDgYDVQQKEwdTdWNzb2Z0MQswCQYDVQQLEwJJVDEb
+        MBkGA1UEAxMScm9vdC10bHMtY2Etc2VydmVyMFkwEwYHKoZIzj0CAQYIKoZIzj0D
+        AQcDQgAEXHvAidXksn9jnB1fVNHmx2DPr4zn1MJZs/bctwBSgM9xyd9ozkFUHc7g
+        UDvg2ItNtzUXouszzTyotgnR6D3LM6NFMEMwDgYDVR0PAQH/BAQDAgEGMBIGA1Ud
+        EwEB/wQIMAYBAf8CAQIwHQYDVR0OBBYEFJ9DyrFuRgOKXdM1JQpvFFM5pDAHMAoG
+        CCqGSM49BAMCA0gAMEUCIQDOHSaxlnSbVjMzeOeNWuzoMNoACQuhuvEDQj9VsSed
+        TQIgVdgQ6qz9ASsph8RGl5di3ep1FvD519WyQnEcyarovRs=
+        -----END CERTIFICATE-----
+
+certificateAuthorities: # 类似 orderers
+  morg1-ca:
+    url: https://172.18.21.78:10054
+    caName: morg1-ca
+    httpOptions:
+      verify: false
+    tlsCACerts: # 和上面不太一样
+      pem: |
+        -----BEGIN CERTIFICATE-----
+        MIIB/zCCAaWgAwIBAgIUCJCtdOmdrADvkJEJjQAwzRgeFKcwCgYIKoZIzj0EAwIw
+        XDELMAkGA1UEBhMCWkgxETAPBgNVBAgTCFpoZWppYW5nMRAwDgYDVQQKEwdTdWNz
+        b2Z0MQswCQYDVQQLEwJJVDEbMBkGA1UEAxMScm9vdC10bHMtY2Etc2VydmVyMB4X
+        DTIwMDUyNjA4NTAwMFoXDTM1MDUyMzA4NTAwMFowXDELMAkGA1UEBhMCWkgxETAP
+        BgNVBAgTCFpoZWppYW5nMRAwDgYDVQQKEwdTdWNzb2Z0MQswCQYDVQQLEwJJVDEb
+        MBkGA1UEAxMScm9vdC10bHMtY2Etc2VydmVyMFkwEwYHKoZIzj0CAQYIKoZIzj0D
+        AQcDQgAEXHvAidXksn9jnB1fVNHmx2DPr4zn1MJZs/bctwBSgM9xyd9ozkFUHc7g
+        UDvg2ItNtzUXouszzTyotgnR6D3LM6NFMEMwDgYDVR0PAQH/BAQDAgEGMBIGA1Ud
+        EwEB/wQIMAYBAf8CAQIwHQYDVR0OBBYEFJ9DyrFuRgOKXdM1JQpvFFM5pDAHMAoG
+        CCqGSM49BAMCA0gAMEUCIQDOHSaxlnSbVjMzeOeNWuzoMNoACQuhuvEDQj9VsSed
+        TQIgVdgQ6qz9ASsph8RGl5di3ep1FvD519WyQnEcyarovRs=
+        -----END CERTIFICATE-----
+#    registrar: # ca 用户名和密码，与创建ca命令参数对应
+#      - enrollId: admin
+#        enrollSecret: adminpw
