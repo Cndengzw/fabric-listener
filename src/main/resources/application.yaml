@@ -19,6 +19,6 @@ spring:
   datasource:
     driver-class-name: com.mysql.jdbc.Driver
     url: jdbc:mysql://IP:PORT/fabric?useUnicode=true&characterEncoding=utf8&useSSL=false
-    username: 
+    username:
     password:
 
