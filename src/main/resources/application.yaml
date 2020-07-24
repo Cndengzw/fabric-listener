@@ -18,15 +18,7 @@ fabric:
 spring:
   datasource:
     driver-class-name: com.mysql.jdbc.Driver
-    url: jdbc:mysql://139.159.221.69:3305/fabric?useUnicode=true&characterEncoding=utf8&useSSL=false
-    username: root
-    password: root
+    url: jdbc:mysql://IP:PORT/fabric?useUnicode=true&characterEncoding=utf8&useSSL=false
+    username: 
+    password:
 
-
-dc:
-  #  endpoint: http://localhost:6060/dc-server
-  endpoint: http://172.18.21.32:6060/dc-server
-  dataset-name: sample
-  # query-def: /queries/**
-  show-sql: true
-  # use-query-def-cache: false
