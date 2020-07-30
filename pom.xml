@@ -16,7 +16,6 @@
 
     <properties>
         <java.version>1.8</java.version>
-        <hibernate.version>5.2.1.Final</hibernate.version>
     </properties>
 
     <dependencies>
@@ -89,12 +88,10 @@
             <artifactId>springfox-swagger-ui</artifactId>
             <version>2.9.2</version>
         </dependency>
-
-        <!--<dependency>
-            <groupId>com.cgs</groupId>
-            <artifactId>dc-client-starter</artifactId>
-            <version>1.1.8</version>
-        </dependency>-->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+        </dependency>
 
     </dependencies>
 

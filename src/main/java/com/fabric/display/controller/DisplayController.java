@@ -1,6 +1,8 @@
 package com.fabric.display.controller;
 
 import com.fabric.display.bean.*;
+import com.fabric.display.bean.vo.MonthCountVO;
+import com.fabric.display.bean.vo.TransactionVO;
 import com.fabric.display.service.BlockInfoService;
 import com.fabric.display.service.ListennerService;
 import com.fabric.display.service.SQLTransactionService;
@@ -28,6 +30,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.text.ParseException;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Set;
@@ -48,92 +51,35 @@ public class DisplayController {
     private ListennerService listenerService;
     @Autowired
     private SQLTransactionService sqlTransactionService;
-    @Autowired
-    private BlockInfoService blockInfoService;
-    @Autowired
-    private Gson gson;
 
-    private static final String defaultChannelName = "foochannel";
-    private static final String mspID = "MSP-org1";
-    private static Channel channel = null;
-    private static Network network = null;
-    private static Map<String, BlockEvent> map = new ConcurrentHashMap<>();
-
-    // 连接网络
-    @PostConstruct
-    public void init() throws Exception {
-        Wallet wallet = Wallet.createInMemoryWallet();   // 内存 wallet
-//         String connectionYaml = "src/main/resources/suc_fabric/connection-org1.yaml";
-        String connectionYaml = System.getProperty("user.dir") + "\\suc_fabric\\connection-org1.yaml";
-        Path networkConfigFile = Paths.get(connectionYaml);
-
-//         String adminCertificatePem = "src/main/resources/suc_fabric/cert.pem";
-        String adminCertificatePem = System.getProperty("user.dir") + "\\suc_fabric\\cert.pem";
-        Path certificatePem = Paths.get(adminCertificatePem);
-
-//         String adminPricateKey = "src/main/resources/suc_fabric/priv_sk";
-         String adminPricateKey = System.getProperty("user.dir") + "\\suc_fabric\\priv_sk";
-        Path privateKey = Paths.get(adminPricateKey);
-
-        try {
-            Wallet.Identity identity = Wallet.Identity.createIdentity(mspID, Files.newBufferedReader(certificatePem), Files.newBufferedReader(privateKey));
-            wallet.put("userName", identity);
-            Gateway.Builder builder = Gateway.createBuilder().
-                    identity(wallet, "userName").
-                    networkConfig(networkConfigFile)
-                    .discovery(true);
-            Gateway defaultGateway = builder.connect();
-            network = defaultGateway.getNetwork(defaultChannelName);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        /*channel = network.getChannel();
-         channel.registerBlockListener(blockEvent -> {
-            System.out.println("blockEvent 进来了..;.");
-            // 监听逻辑
-            try {
-                System.out.println("监听到了！  " + blockEvent.getBlockNumber());
-                listenerService.listenNewestBlock(blockEvent);
-            } catch (InvalidProtocolBufferException e) {
-                e.printStackTrace();
-            }
-            map.put("blockEvent", blockEvent);
-            }
-        );*/
-
-        network.addBlockListener(blockEvent -> {
-            String dataHash = Arrays.toString(blockEvent.getDataHash());
-            log.info("addBlockListener" + network.getChannel().getName() + " 监听到最新的了！dataHash: " + dataHash + ", BlockNumber: " + blockEvent.getBlockNumber());
-            // 监听逻辑
-            try {
-                listenerService.listenNewestBlock(blockEvent);
-            } catch (InvalidProtocolBufferException e) {
-                e.printStackTrace();
-            }
-            map.put(network.getChannel().getName(), blockEvent);
-        });
-    }
-
-    @ApiOperation("获得最新区块信息")
+    @ApiOperation("获得最新 N 个区块信息(默认是最新的一个)")
     @GetMapping("getNewestBlockInfo")
-    public String getNewestBlockInfo(@RequestParam("channelName") String channelName) throws InvalidProtocolBufferException {
-        BlockEvent blockEvent = map.get(channelName); // 最新区块事件
-        if (blockEvent == null) {
-            return "通道名输入错误或该通道启动监听功能后还未监听到任何区块";
-        }
-
-        BlockHeader blockHeader = blockInfoService.getBlockHeader(blockEvent);
-        BlockMataData blockMataData = blockInfoService.getBlockMetaData(blockEvent);
-        BlockData blockData = blockInfoService.getBlockData(blockEvent);
-
-        return gson.toJson(new Block(blockHeader, blockData, blockMataData));
+    public String getNewestBlockInfo(@RequestParam("channelName") String channelName, @RequestParam(value = "count", required = false) Integer count) throws IOException, ParseException {
+        count = count == null ? 1 : count;
+        return listenerService.getLastBlockInfo(channelName, count);
     }
 
-    @ApiOperation("获得最新交易动态")
+    @ApiOperation("获得最新 N 个交易(默认是最新的5个)")
     @GetMapping("getNewestTransactions")
-    public Set<DataTransaction> getNewestTransactions(@RequestParam("number") Integer number) {
-        return listenerService.selectNewestTransactions(number);
+    public Set<TransactionVO> getNewestTransactions(@RequestParam(value = "count", required = false) Integer count) {
+        count = count == null ? 5 : count;
+        return listenerService.selectNewestTransactions(count);
+    }
+
+    @ApiOperation("查询最近12个月交易趋势")
+    @GetMapping("selectLastOneYearTransactions")
+    public MonthCountVO[] selectLastOneYearTransactions() {
+        Map<Integer, Integer> resultMap = sqlTransactionService.selectLastOneYearTransactions();
+        MonthCountVO[] result = new MonthCountVO[12];
+        int i = 0;
+
+        for (Map.Entry<Integer, Integer> integerIntegerEntry : resultMap.entrySet()) {
+            MonthCountVO monthCountVO = new MonthCountVO();
+            monthCountVO.setMonth(integerIntegerEntry.getKey());
+            monthCountVO.setCount(integerIntegerEntry.getValue());
+            result[i++] = monthCountVO;
+        }
+        return result;
     }
 
     @GetMapping("selectOneYearTransactions")
@@ -145,7 +91,7 @@ public class DisplayController {
     @GetMapping("selectOneMonthTransactions")
     @ApiOperation("查询月交易趋势")
     public Map<Integer, Integer> selectOneMonthTransactions(@RequestParam("year") Integer year, @RequestParam("month") Integer month) {
-        return sqlTransactionService.selectOneMonthTransactions(year, month);
+        return sqlTransactionService.selectOneMonthTransactions("foochannel", year, month);
     }
 
 

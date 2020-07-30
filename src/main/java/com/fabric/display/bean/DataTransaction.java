@@ -22,4 +22,6 @@ public class DataTransaction {
     private String type;    // 类型
     private String transactionId;   // 交易ID
     private byte validationCode;    // 验证码
+    private String channelName;     // 该交易所属通道
+    private Long blockNumber;   // 该交易所在区块
 }

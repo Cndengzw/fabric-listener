@@ -9,6 +9,7 @@ import tk.mybatis.mapper.annotation.KeySql;
 import javax.persistence.Column;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import java.sql.Timestamp;
 
 /**
  * @Author Deng Zhiwen
@@ -18,25 +19,28 @@ import javax.persistence.Table;
 @NoArgsConstructor
 @Data
 @Component
-@Table(name = "transactionscount")
+@Table(name = "transactions")
 public class SQLTransaction {
 
     @Id
     @KeySql(useGeneratedKeys = true)
     private Integer id;
 
-    @Column(name = "timeType")
-    private String timeType;
+    private String transactionId;
+    private String mspId;
+    private Boolean isValid;
+    private String channelName;
 
+    private String timeType;
+    private String timestamp;
     private Integer year;
     private Integer month;
     private Integer day;
     private Integer hour;
     private Integer minute;
+    private Integer second;
 
+    private Long blockNumber;
     private Integer count;
-    @Column(name = "lastBlockNum")
-    private Long lastBlockNumber;
-
 
 }

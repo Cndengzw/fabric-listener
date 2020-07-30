@@ -1,9 +1,7 @@
 package com.fabric.display.service;
 
-import com.fabric.display.bean.BlockData;
-import com.fabric.display.bean.BlockHeader;
-import com.fabric.display.bean.BlockMataData;
-import com.fabric.display.bean.DataTransaction;
+import com.fabric.display.bean.*;
+import com.fabric.display.utils.TimeUtil;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 import org.hyperledger.fabric.protos.common.Common;
@@ -66,17 +64,20 @@ public class BlockInfoService {
 
             byte[] nonce = envelopeInfo.getNonce();
             String nonceStr = Base64.getEncoder().encodeToString(nonce);  // 交易随机数
-            Date timestamp = envelopeInfo.getTimestamp();  // 时间戳
+            /*Date timestamp = envelopeInfo.getTimestamp();  // 时间戳
             SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-            String time = simpleDateFormat.format(timestamp);
+            String time = simpleDateFormat.format(timestamp);*/
+            String time = TimeUtil.date2String(envelopeInfo.getTimestamp());    // 时间戳
+            // long time = timestamp.getTime();
 
             String transactionID = envelopeInfo.getTransactionID();    // 交易ID
             String type = envelopeInfo.getType().toString();  // 类型
             byte validationCode = envelopeInfo.getValidationCode();    // 验证码
 
-            allTransactions.add(new DataTransaction(valid, creatorMSPId, creatorId, nonceStr, time, type, transactionID, validationCode));
+            DataTransaction sqlTransaction = new DataTransaction(valid, creatorMSPId, creatorId, nonceStr, time, type, transactionID, validationCode, envelopeInfo.getChannelId(), blockEvent.getBlockNumber());
+            allTransactions.add(sqlTransaction);
             if (valid) {
-                validTransactions.add(new DataTransaction(true, creatorMSPId, creatorId, nonceStr, time, type, transactionID, validationCode));
+                validTransactions.add(sqlTransaction);
             }
         }
 

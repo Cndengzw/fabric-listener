@@ -22,13 +22,6 @@ public class ScheduledTasks {
     @Autowired
     private ListennerService listennerService;
 
-    // 每半小时统计一次，这里为了测试方便，改为三分钟一次，如果是半小时  下面改为 "0 */30 * * * ?"
-    @Async
-    @Scheduled(cron = "0 */3 * * * ?")
-    public void insertHalfHourTransactions() {
-        logger.info("半小时开始统计一次");
-        listennerService.insertHalfHourTransactions();
-    }
 
     // 每天 23:58 统计当天交易量
     @Async

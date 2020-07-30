@@ -13,10 +13,7 @@ import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @Author Deng Zhiwen
@@ -29,6 +26,31 @@ public class SQLTransactionService {
     @Autowired
     private SQLTransactionMapper sqlTransactionMapper;
 
+    // 查询最近 12 个月的交易量
+    public Map<Integer, Integer> selectLastOneYearTransactions() {
+        int thisMonth = LocalDateTime.now().getMonthValue();
+        int thisYear = LocalDateTime.now().getYear();
+        int queryMonth = thisMonth + 1; // 去年这个月
+        int queryYear = thisYear - 1;
+
+        Map<Integer, Integer> lastOneYearTransactions = new LinkedHashMap<>();
+        for (int i = 0; i < 11; i++) {
+            if (queryMonth > 12) {
+                queryMonth = 1;
+                queryYear++;
+            }
+            SQLTransaction sqlTransaction = new SQLTransaction();
+            sqlTransaction.setYear(queryYear);
+            sqlTransaction.setMonth(queryMonth);
+            if (queryMonth != LocalDateTime.now().getMonthValue()){
+                sqlTransaction.setTimeType("month");
+            }
+            lastOneYearTransactions.put(queryMonth, sqlTransactionMapper.select(sqlTransaction).size());
+            queryMonth++;
+        }
+
+        return lastOneYearTransactions;
+    }
 
     // 查找某一年的每月交易量
     public Map<Integer, Integer> selectOneYearTransactions(int year) {
@@ -59,11 +81,12 @@ public class SQLTransactionService {
     }
 
     // 查找某一月的每日交易量
-    public Map<Integer, Integer> selectOneMonthTransactions(Integer year, Integer month) {
+    public Map<Integer, Integer> selectOneMonthTransactions(String channelName, Integer year, Integer month) {
         SQLTransaction sqlTransaction = new SQLTransaction();
         sqlTransaction.setYear(year);
         sqlTransaction.setMonth(month);
         sqlTransaction.setTimeType("day");
+        sqlTransaction.setChannelName(channelName);
         List<SQLTransaction> months = sqlTransactionMapper.select(sqlTransaction);
 
         HashMap<Integer, Integer> dayTransactionMap = new HashMap<>();
@@ -71,24 +94,20 @@ public class SQLTransactionService {
             dayTransactionMap.put(transaction.getDay(), transaction.getCount());
         }
 
-        Integer thisDayCount = selectOneDayTransactions(year, month, LocalDateTime.now().getDayOfMonth());
+        Integer thisDayCount = selectOneDayTransactions(channelName, year, month, LocalDateTime.now().getDayOfMonth());
         dayTransactionMap.put(LocalDateTime.now().getDayOfMonth(), thisDayCount);
 
         return dayTransactionMap;
     }
 
     // 查找某一天的所有交易量
-    public Integer selectOneDayTransactions(Integer year, Integer month, Integer day) {
+    public Integer selectOneDayTransactions(String channelName, Integer year, Integer month, Integer day) {
         SQLTransaction sqlTransaction = new SQLTransaction();
         sqlTransaction.setYear(year);
         sqlTransaction.setMonth(month);
         sqlTransaction.setDay(day);
-        List<SQLTransaction> days = sqlTransactionMapper.select(sqlTransaction);
-        int result = 0;
-        for (SQLTransaction transaction : days) {
-            result += transaction.getCount();
-        }
-        return result;
+        sqlTransaction.setChannelName(channelName);
+        return sqlTransactionMapper.select(sqlTransaction).size();
     }
 
 
